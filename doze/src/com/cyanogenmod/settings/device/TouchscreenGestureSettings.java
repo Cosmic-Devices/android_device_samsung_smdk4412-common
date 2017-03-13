@@ -20,14 +20,12 @@ import org.cyanogenmod.internal.util.ScreenType;
 
 import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v14.preference.PreferenceFragment;
-import android.support.v14.preference.SwitchPreference;
-import android.support.v7.preference.Preference;
+import android.preference.Preference;
+import android.preference.PreferenceActivity;
+import android.preference.SwitchPreference;
 import android.provider.Settings;
 
-import org.cyanogenmod.internal.util.ScreenType;
-
-public class TouchscreenGestureSettings extends PreferenceFragment {
+public class TouchscreenGestureSettings extends PreferenceActivity {
 
     private static final String KEY_AMBIENT_DISPLAY_ENABLE = "ambient_display_enable";
     private static final String KEY_HAND_WAVE = "gesture_hand_wave";
@@ -40,7 +38,8 @@ public class TouchscreenGestureSettings extends PreferenceFragment {
     private SwitchPreference mProximityWakePreference;
 
     @Override
-    public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.gesture_panel);
         boolean dozeEnabled = isDozeEnabled();
         mAmbientDisplayPreference =
@@ -58,25 +57,28 @@ public class TouchscreenGestureSettings extends PreferenceFragment {
         mProximityWakePreference =
             (SwitchPreference) findPreference(KEY_PROXIMITY_WAKE);
         mProximityWakePreference.setOnPreferenceChangeListener(mProximityListener);
+
+        final ActionBar actionBar = getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
 
         // If running on a phone, remove padding around the listview
-        if (!ScreenType.isTablet(getContext())) {
+        if (!ScreenType.isTablet(this)) {
             getListView().setPadding(0, 0, 0, 0);
         }
     }
 
     private boolean enableDoze(boolean enable) {
-        return Settings.Secure.putInt(getContext().getContentResolver(),
+        return Settings.Secure.putInt(getContentResolver(),
                 Settings.Secure.DOZE_ENABLED, enable ? 1 : 0);
     }
 
     private boolean isDozeEnabled() {
-        return Settings.Secure.getInt(getContext().getContentResolver(),
+        return Settings.Secure.getInt(getContentResolver(),
                 Settings.Secure.DOZE_ENABLED, 1) != 0;
     }
 
